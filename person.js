@@ -90,30 +90,31 @@ profile.innerHTML =
 
 function saveContact(){
 
-
 const vcard =
-`
-BEGIN:VCARD
-VERSION:3.0
-FN:${contact.name}
-ORG:${contact.company}
-TITLE:${contact.job}
-TEL:${contact.phone}
-EMAIL:${contact.email}
-URL:${contact.website}
-END:VCARD
-`;
+`BEGIN:VCARD\r\n
+VERSION:3.0\r\n
+CHARSET=UTF-8\r\n
+N:${contact.name};;;;\r\n
+FN:${contact.name}\r\n
+ORG:${contact.company}\r\n
+TITLE:${contact.job}\r\n
+TEL;TYPE=CELL:${contact.phone}\r\n
+EMAIL:${contact.email}\r\n
+URL:${contact.website}\r\n
+END:VCARD`;
 
 
-const file =
-new Blob(
-[vcard],
-{type:"text/vcard"}
+
+const blob = new Blob(
+    [vcard],
+    {
+        type:"text/vcard;charset=utf-8"
+    }
 );
 
 
 const url =
-URL.createObjectURL(file);
+URL.createObjectURL(blob);
 
 
 const link =
@@ -122,11 +123,17 @@ document.createElement("a");
 
 link.href=url;
 
-link.download=
-contact.name+".vcf";
+link.download =
+contact.name + ".vcf";
 
+
+document.body.appendChild(link);
 
 link.click();
 
+document.body.removeChild(link);
+
+
+URL.revokeObjectURL(url);
 
 }
