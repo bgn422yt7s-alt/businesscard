@@ -58,13 +58,13 @@ profile.innerHTML = `
 
 <h3>${contact.job}</h3>
 
-<p>🏢 ${contact.company}</p>
+<p>Unternehmen: ${contact.company}</p>
 
-<p>📧 ${contact.email}</p>
+<p>Mail: ${contact.email}</p>
 
-<p>📞 ${contact.phone}</p>
+<p>Telefon: ${contact.phone}</p>
 
-<p>🌐 ${contact.website}</p>
+<p>Website: ${contact.website}</p>
 
 
 <button onclick="saveContact()">
