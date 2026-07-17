@@ -30,6 +30,52 @@ const searchInput = document.getElementById("search");
 const results = document.getElementById("results");
 
 
+// Kontakt als Handy-Kontakt speichern
+function saveContact(index) {
+
+    const contact = contacts[index];
+
+
+    const vcard = 
+`BEGIN:VCARD
+VERSION:3.0
+FN:${contact.name}
+ORG:${contact.company}
+TITLE:${contact.job}
+TEL:${contact.phone}
+EMAIL:${contact.email}
+URL:${contact.website}
+END:VCARD`;
+
+
+    const blob = new Blob(
+        [vcard],
+        { type: "text/vcard" }
+    );
+
+
+    const url = URL.createObjectURL(blob);
+
+
+    const link = document.createElement("a");
+
+    link.href = url;
+
+    link.download = contact.name + ".vcf";
+
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+
+    URL.revokeObjectURL(url);
+}
+
+
+
 function showContacts(contactList) {
 
     results.innerHTML = "";
@@ -37,13 +83,18 @@ function showContacts(contactList) {
 
     if (contactList.length === 0) {
 
-        results.innerHTML = "<p>Keine Kontakte gefunden</p>";
+        results.innerHTML =
+        "<p>Keine Kontakte gefunden</p>";
 
         return;
     }
 
 
     contactList.forEach(contact => {
+
+
+        const index = contacts.indexOf(contact);
+
 
         results.innerHTML += `
 
@@ -61,9 +112,13 @@ function showContacts(contactList) {
 
             <p>🌐 ${contact.website}</p>
 
-            <button>
+
+            <button onclick="saveContact(${index})">
+
                 Kontakt speichern
+
             </button>
+
 
         </div>
 
@@ -77,26 +132,27 @@ function showContacts(contactList) {
 
 searchInput.addEventListener("input", function() {
 
+
     const searchText =
-        searchInput.value.toLowerCase().trim();
+    searchInput.value.toLowerCase().trim();
 
 
-    const filteredContacts =
-        contacts.filter(contact => {
+    const filtered =
+    contacts.filter(contact =>
 
-            return (
-                contact.name.toLowerCase().includes(searchText) ||
-                contact.company.toLowerCase().includes(searchText) ||
-                contact.job.toLowerCase().includes(searchText)
-            );
+        contact.name.toLowerCase().includes(searchText) ||
 
-        });
+        contact.company.toLowerCase().includes(searchText) ||
+
+        contact.job.toLowerCase().includes(searchText)
+
+    );
 
 
-    showContacts(filteredContacts);
+    showContacts(filtered);
 
 });
 
 
-// Startansicht
+// Kontakte beim Start anzeigen
 showContacts(contacts);
