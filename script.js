@@ -1,0 +1,102 @@
+const contacts = [
+    {
+        name: "Max Mustermann",
+        job: "Geschäftsführer",
+        company: "Muster GmbH",
+        email: "max@muster.de",
+        phone: "+49 123456",
+        website: "https://muster.de"
+    },
+    {
+        name: "Anna Beispiel",
+        job: "Marketing Managerin",
+        company: "Beispiel AG",
+        email: "anna@beispiel.de",
+        phone: "+49 987654",
+        website: "https://beispiel.de"
+    },
+    {
+        name: "Peter Schmidt",
+        job: "IT Berater",
+        company: "Schmidt Solutions",
+        email: "peter@schmidt.de",
+        phone: "+49 555222",
+        website: "https://schmidt.de"
+    }
+];
+
+
+const searchInput = document.getElementById("search");
+const results = document.getElementById("results");
+
+
+function showContacts(contactList) {
+
+    results.innerHTML = "";
+
+
+    if (contactList.length === 0) {
+
+        results.innerHTML = "<p>Keine Kontakte gefunden</p>";
+
+        return;
+    }
+
+
+    contactList.forEach(contact => {
+
+        results.innerHTML += `
+
+        <div class="card">
+
+            <h2>${contact.name}</h2>
+
+            <p>${contact.job}</p>
+
+            <p>🏢 ${contact.company}</p>
+
+            <p>📧 ${contact.email}</p>
+
+            <p>📞 ${contact.phone}</p>
+
+            <p>🌐 ${contact.website}</p>
+
+            <button>
+                Kontakt speichern
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+
+
+searchInput.addEventListener("input", function() {
+
+    const searchText =
+        searchInput.value.toLowerCase().trim();
+
+
+    const filteredContacts =
+        contacts.filter(contact => {
+
+            return (
+                contact.name.toLowerCase().includes(searchText) ||
+                contact.company.toLowerCase().includes(searchText) ||
+                contact.job.toLowerCase().includes(searchText)
+            );
+
+        });
+
+
+    showContacts(filteredContacts);
+
+});
+
+
+// Startansicht
+showContacts(contacts);
