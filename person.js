@@ -3,7 +3,7 @@ const contacts = [
 {
 id:1,
 name:"Max Muster",
-job:"Geschäftsführer",
+job:"Geschaeftsfuehrer",
 company:"Muster GmbH",
 email:"max@muster.de",
 phone:"+49 123456",
