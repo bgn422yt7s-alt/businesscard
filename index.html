@@ -2,28 +2,156 @@
 <html lang="de">
 
 <head>
-<meta charset="UTF-8">
-<title>ContactFinder</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ContactFinder</title>
+
+    <meta name="description" content="ContactFinder – Kontakte präzise und elegant finden.">
+
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="container">
+    <main class="app">
 
-<h1>ContactFinder</h1>
+        <!-- Header -->
+        <header class="header">
 
-<input 
-id="search"
-placeholder="Person suchen..."
->
+            <div class="brand">
+                <div class="brand-mark">
+                    CF
+                </div>
 
-<div id="results"></div>
+                <div class="brand-text">
+                    <span class="brand-name">ContactFinder</span>
+                    <span class="brand-subtitle">CONTACT INTELLIGENCE</span>
+                </div>
+            </div>
 
-</div>
+            <div class="header-status">
+                <span class="status-dot"></span>
+                SYSTEM ONLINE
+            </div>
+
+        </header>
 
 
-<script src="script.js"></script>
+        <!-- Hero -->
+        <section class="hero">
+
+            <div class="hero-label">
+                <span></span>
+                SMART CONTACT SEARCH
+            </div>
+
+            <h1>
+                Finden Sie den<br>
+                <strong>richtigen Kontakt.</strong>
+            </h1>
+
+            <p>
+                Präzise. Schnell. Diskret.
+            </p>
+
+        </section>
+
+
+        <!-- Search -->
+        <section class="search-section">
+
+            <div class="search-container">
+
+                <div class="search-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="11" cy="11" r="6.5"></circle>
+                        <line x1="16" y1="16" x2="21" y2="21"></line>
+                    </svg>
+                </div>
+
+                <input
+                    id="search"
+                    type="search"
+                    placeholder="Person suchen..."
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+
+                <div class="search-command">
+                    ⌘ K
+                </div>
+
+            </div>
+
+            <div class="search-hint">
+                Namen, Unternehmen oder andere Informationen eingeben
+            </div>
+
+        </section>
+
+
+        <!-- Results -->
+        <section class="results-section">
+
+            <div class="section-header">
+
+                <div>
+                    <span class="section-label">RESULTS</span>
+                    <h2>Suchergebnisse</h2>
+                </div>
+
+                <div id="resultCount" class="result-count">
+                    0 Kontakte
+                </div>
+
+            </div>
+
+            <div id="results" class="results">
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="11" cy="11" r="6.5"></circle>
+                            <line x1="16" y1="16" x2="21" y2="21"></line>
+                        </svg>
+                    </div>
+
+                    <h3>Bereit für Ihre Suche</h3>
+
+                    <p>
+                        Geben Sie einen Namen ein, um Kontakte zu finden.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Footer -->
+        <footer class="footer">
+
+            <div>
+                CONTACTFINDER
+            </div>
+
+            <div>
+                <span>SECURE</span>
+                <span class="footer-separator">•</span>
+                <span>PRIVATE</span>
+                <span class="footer-separator">•</span>
+                <span>PRECISE</span>
+            </div>
+
+        </footer>
+
+    </main>
+
+
+    <script src="script.js"></script>
 
 </body>
 
