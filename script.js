@@ -19,7 +19,15 @@ email:"anna@beispiel.de",
 phone:"+49 987654",
 website:"https://beispiel.de"
 }
-
+{
+id:3,
+name:"Anne Grabherr",
+job:"",
+company:"",
+email:"",
+phone:"01736897078",
+website:""
+}
 ];
 
 
