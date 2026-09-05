@@ -8,7 +8,7 @@
     >
     <meta
         name="description"
-        content="ContactFinder – Kontaktprofil"
+        content="Kontaktprofil | ContactFinder"
     >
     <meta
         name="theme-color"
@@ -23,11 +23,7 @@
              HEADER
              ================================================= -->
         <header class="header">
-            <a
-                href="index.html"
-                class="brand"
-                aria-label="Zurück zu ContactFinder"
-            >
+            <div class="brand">
                 <div
                     class="brand-mark"
                     aria-hidden="true"
@@ -42,33 +38,8 @@
                         CONTACT INTELLIGENCE
                     </span>
                 </div>
-            </a>
-            <div class="header-status">
-                <span
-                    class="status-dot"
-                    aria-hidden="true"
-                ></span>
-                <span>
-                    SECURE PROFILE
-                </span>
             </div>
         </header>
-        <!-- =================================================
-             BACK
-             ================================================= -->
-        <div class="profile-navigation">
-            <a
-                href="index.html"
-                class="back-link"
-            >
-                <span
-                    aria-hidden="true"
-                >
-                    ←
-                </span>
-                Zurück zur Suche
-            </a>
-        </div>
         <!-- =================================================
              PROFILE
              ================================================= -->
@@ -79,47 +50,14 @@
         >
             <!--
                 person.js fügt hier automatisch
-                das entsprechende Profil ein.
+                das ausgewählte Kontaktprofil ein.
             -->
         </section>
-        <!-- =================================================
-             FOOTER
-             ================================================= -->
-        <footer class="footer">
-            <div>
-                CONTACTFINDER
-            </div>
-            <div>
-                <span>
-                    SECURE
-                </span>
-                <span
-                    class="footer-separator"
-                    aria-hidden="true"
-                >
-                    •
-                </span>
-                <span>
-                    PRIVATE
-                </span>
-                <span
-                    class="footer-separator"
-                    aria-hidden="true"
-                >
-                    •
-                </span>
-                <span>
-                    PRECISE
-                </span>
-            </div>
-        </footer>
     </main>
     <!-- =====================================================
          JAVASCRIPT
-         contacts.js stellt die Kontaktdaten bereit.
-         person.js verarbeitet die URL-ID und erstellt
-         anschließend das Profil.
-         REIHENFOLGE IST WICHTIG.
+         contacts.js = zentrale Kontaktdaten
+         person.js   = Profil + Kontakt speichern
          ===================================================== -->
     <script src="contacts.js"></script>
     <script src="person.js"></script>
