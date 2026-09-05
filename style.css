@@ -113,7 +113,26 @@ a {
 /* =========================================================
    HEADER
    ========================================================= */
+/* =========================================================
+   PERSON.HTML – BILD / LOGO
+   ========================================================= */
 
+.profile-header {
+    justify-content: flex-start;
+}
+
+.profile-logo {
+    display: block;
+
+    width: auto;
+    height: 48px;
+
+    max-width: 180px;
+
+    object-fit: contain;
+
+    object-position: left center;
+}
 .header {
 
     display: flex;
