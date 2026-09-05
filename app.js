@@ -1,1291 +1,1056 @@
-/* =========================================================
-   CONTACTFINDER
-   GLOBAL DESIGN
-   ========================================================= */
-
-:root {
-
-    --black: #080808;
-    --black-soft: #111111;
-    --black-light: #181818;
-
-    --white: #ffffff;
-    --white-soft: #fafafa;
-    --white-gray: #f5f5f5;
-
-    --silver: #a1a1a1;
-    --silver-dark: #6f6f6f;
-
-    --line: #e5e5e5;
-    --line-dark: #d5d5d5;
-
-    --shadow-small:
-        0 4px 18px rgba(0, 0, 0, 0.04);
-
-    --shadow-medium:
-        0 14px 45px rgba(0, 0, 0, 0.07);
-
-    --shadow-large:
-        0 28px 80px rgba(0, 0, 0, 0.10);
-
-    --radius-small: 9px;
-    --radius-medium: 14px;
-    --radius-large: 22px;
-
-    --transition:
-        220ms cubic-bezier(0.22, 1, 0.36, 1);
-}
+/*
+ * =========================================================
+ * CONTACTFINDER
+ * ZENTRALE APP.JS
+ * =========================================================
+ *
+ * Diese Datei übernimmt ALLES:
+ *
+ * - Kontakt-Datenbank
+ * - Suche
+ * - Ergebnisliste
+ * - Profilseite
+ * - vCard-Erstellung
+ * - Kontakt speichern
+ *
+ * Sie funktioniert automatisch auf:
+ *
+ * - index.html
+ * - person.html
+ *
+ * Es werden KEINE weiteren JavaScript-Dateien benötigt.
+ *
+ * =========================================================
+ */
 
 
 /* =========================================================
-   RESET
+   KONTAKTDATEN
    ========================================================= */
 
-* {
-    box-sizing: border-box;
+const contacts = [
+
+    {
+        id: 1,
+        name: "Max Mustermann",
+        job: "Geschäftsführer",
+        company: "Muster GmbH",
+        email: "max@muster.de",
+        phone: "+49 123456",
+        website: "https://muster.de"
+    },
+
+    {
+        id: 2,
+        name: "Anna Beispiel",
+        job: "Marketing Managerin",
+        company: "Beispiel AG",
+        email: "anna@beispiel.de",
+        phone: "+49 987654",
+        website: "https://beispiel.de"
+    },
+
+    {
+        id: 3,
+        name: "Anne",
+        job: "",
+        company: "",
+        email: "",
+        phone: "",
+        website: ""
+    }
+
+];
+
+
+/* =========================================================
+   HILFSFUNKTIONEN
+   ========================================================= */
+
+
+/*
+ * HTML sicher machen
+ */
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+
+        .replace(/&/g, "&amp;")
+
+        .replace(/</g, "&lt;")
+
+        .replace(/>/g, "&gt;")
+
+        .replace(/"/g, "&quot;")
+
+        .replace(/'/g, "&#039;");
 }
 
 
-html {
-    min-height: 100%;
+/*
+ * Text für Suche normalisieren
+ */
+
+function normalize(value) {
+
+    return String(value ?? "")
+        .trim()
+        .toLowerCase();
 }
 
 
-body {
+/*
+ * vCard-Zeichen escapen
+ */
 
-    margin: 0;
+function escapeVCard(value) {
 
-    min-height: 100vh;
+    return String(value ?? "")
 
-    background:
-        linear-gradient(
-            180deg,
-            #ffffff 0%,
-            #fafafa 55%,
-            #f3f3f3 100%
+        .replace(/\\/g, "\\\\")
+
+        .replace(/\r\n/g, "\\n")
+
+        .replace(/\n/g, "\\n")
+
+        .replace(/\r/g, "\\n")
+
+        .replace(/;/g, "\\;")
+
+        .replace(/,/g, "\\,");
+}
+
+
+/*
+ * Sicheren Dateinamen erzeugen
+ */
+
+function safeFileName(value) {
+
+    const cleaned = String(value ?? "")
+
+        .replace(
+            /[<>:"/\\|?*\x00-\x1F]/g,
+            ""
+        )
+
+        .trim()
+
+        .replace(/\s+/g, " ");
+
+
+    return cleaned || "Kontakt";
+}
+
+
+/*
+ * Initialen erzeugen
+ */
+
+function getInitials(name) {
+
+    const clean =
+        String(name ?? "")
+            .trim()
+            .replace(/\s+/g, " ");
+
+
+    if (!clean) {
+
+        return "CF";
+    }
+
+
+    const parts =
+        clean.split(" ");
+
+
+    if (parts.length === 1) {
+
+        return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+    }
+
+
+    return (
+        parts[0].charAt(0) +
+        parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
+}
+
+
+/* =========================================================
+   SUCHSEITE
+   ========================================================= */
+
+function initializeSearch() {
+
+    const search =
+        document.getElementById("search");
+
+    const results =
+        document.getElementById("results");
+
+    const resultCount =
+        document.getElementById("resultCount");
+
+
+    /*
+     * Wenn die Elemente nicht existieren,
+     * sind wir nicht auf der Suchseite.
+     */
+
+    if (!search || !results) {
+
+        return;
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * ERGEBNISSE ANZEIGEN
+     * -----------------------------------------------------
+     */
+
+    function renderResults(list) {
+
+        results.innerHTML = "";
+
+
+        /*
+         * Anzahl
+         */
+
+        if (resultCount) {
+
+            resultCount.textContent =
+                `${list.length} ${
+                    list.length === 1
+                        ? "Kontakt"
+                        : "Kontakte"
+                }`;
+        }
+
+
+        /*
+         * Keine Ergebnisse
+         */
+
+        if (list.length === 0) {
+
+            results.innerHTML = `
+
+                <div class="empty-state">
+
+                    <div
+                        class="empty-icon"
+                        aria-hidden="true"
+                    >
+
+                        <svg viewBox="0 0 24 24">
+
+                            <circle
+                                cx="11"
+                                cy="11"
+                                r="6.5"
+                            ></circle>
+
+                            <line
+                                x1="16"
+                                y1="16"
+                                x2="21"
+                                y2="21"
+                            ></line>
+
+                        </svg>
+
+                    </div>
+
+
+                    <h3>
+                        Keine Kontakte gefunden
+                    </h3>
+
+
+                    <p>
+                        Versuchen Sie einen anderen
+                        Suchbegriff.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+        }
+
+
+        /*
+         * Kontakte
+         */
+
+        list.forEach(contact => {
+
+            const card =
+                document.createElement("div");
+
+
+            card.className =
+                "result-card";
+
+
+            const company =
+                contact.company
+                    ? escapeHTML(contact.company)
+                    : "Keine Firma angegeben";
+
+
+            card.innerHTML = `
+
+                <div>
+
+                    <div class="result-card-name">
+
+                        ${escapeHTML(contact.name)}
+
+                    </div>
+
+
+                    <div class="result-card-info">
+
+                        ${company}
+
+                    </div>
+
+                </div>
+
+
+                <a
+
+                    class="result-card-arrow"
+
+                    href="person.html?id=${encodeURIComponent(contact.id)}"
+
+                    aria-label="Profil von ${escapeHTML(contact.name)} öffnen"
+
+                >
+
+                    →
+
+                </a>
+
+            `;
+
+
+            results.appendChild(card);
+
+        });
+
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * SUCHEN
+     * -----------------------------------------------------
+     */
+
+    function searchContacts() {
+
+        const value =
+            normalize(search.value);
+
+
+        /*
+         * Leer:
+         * alle Kontakte
+         */
+
+        if (!value) {
+
+            renderResults(contacts);
+
+            return;
+        }
+
+
+        /*
+         * Suchfelder
+         */
+
+        const filtered =
+            contacts.filter(contact => {
+
+                const searchable = [
+
+                    contact.name,
+
+                    contact.job,
+
+                    contact.company,
+
+                    contact.email,
+
+                    contact.phone,
+
+                    contact.website
+
+                ]
+                    .filter(Boolean)
+                    .join(" ");
+
+
+                return normalize(searchable)
+                    .includes(value);
+
+            });
+
+
+        renderResults(filtered);
+    }
+
+
+    /*
+     * Suche überwachen
+     */
+
+    search.addEventListener(
+        "input",
+        searchContacts
+    );
+
+
+    /*
+     * Tastatur:
+     * CMD/CTRL + K
+     */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                (event.metaKey || event.ctrlKey) &&
+                event.key.toLowerCase() === "k"
+            ) {
+
+                event.preventDefault();
+
+                search.focus();
+
+                search.select();
+            }
+
+        }
+    );
+
+
+    /*
+     * Startanzeige
+     */
+
+    renderResults(contacts);
+}
+
+
+/* =========================================================
+   PROFILSEITE
+   ========================================================= */
+
+function initializeProfile() {
+
+    const profile =
+        document.getElementById("profile");
+
+
+    /*
+     * Kein Profil-Container:
+     * nicht person.html
+     */
+
+    if (!profile) {
+
+        return;
+    }
+
+
+    /*
+     * ID aus URL
+     */
+
+    const params =
+        new URLSearchParams(
+            window.location.search
         );
 
-    color: var(--black);
 
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "SF Pro Display",
-        "SF Pro Text",
-        "Helvetica Neue",
-        Arial,
-        sans-serif;
+    const id =
+        params.get("id");
 
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-}
 
+    /*
+     * Kontakt suchen
+     */
 
-button,
-input {
-    font: inherit;
-}
-
-
-a {
-    color: inherit;
-}
-
-
-/* =========================================================
-   APP
-   ========================================================= */
-
-.app {
-
-    width: min(1180px, calc(100% - 48px));
-
-    margin: 0 auto;
-
-    min-height: 100vh;
-
-    padding:
-        28px 0
-        50px;
-}
-
-
-/* =========================================================
-   HEADER
-   ========================================================= */
-
-.header {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    min-height: 58px;
-}
-
-
-.brand {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 13px;
-}
-
-
-.brand-mark {
-
-    width: 42px;
-    height: 42px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 11px;
-
-    background: var(--black);
-
-    color: var(--white);
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.08em;
-
-    box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.14);
-}
-
-
-.brand-text {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 3px;
-}
-
-
-.brand-name {
-
-    font-size: 16px;
-
-    font-weight: 650;
-
-    letter-spacing: -0.02em;
-}
-
-
-.brand-subtitle {
-
-    font-size: 8px;
-
-    font-weight: 700;
-
-    color: var(--silver-dark);
-
-    letter-spacing: 0.22em;
-}
-
-
-/* =========================================================
-   HERO
-   ========================================================= */
-
-.hero {
-
-    padding-top: 105px;
-
-    max-width: 850px;
-}
-
-
-.hero-label {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-
-    margin-bottom: 25px;
-
-    color: var(--silver-dark);
-
-    font-size: 10px;
-
-    font-weight: 750;
-
-    letter-spacing: 0.18em;
-}
-
-
-.hero-label span {
-
-    width: 6px;
-    height: 6px;
-
-    border-radius: 50%;
-
-    background: var(--black);
-}
-
-
-.hero h1 {
-
-    margin: 0;
-
-    font-size: clamp(46px, 7vw, 86px);
-
-    line-height: 0.98;
-
-    font-weight: 350;
-
-    letter-spacing: -0.055em;
-}
-
-
-.hero h1 strong {
-
-    font-weight: 700;
-}
-
-
-.hero p {
-
-    margin: 28px 0 0;
-
-    color: var(--silver-dark);
-
-    font-size: 16px;
-
-    letter-spacing: -0.01em;
-}
-
-
-/* =========================================================
-   SEARCH
-   ========================================================= */
-
-.search-section {
-
-    margin-top: 70px;
-
-    max-width: 900px;
-}
-
-
-.search-container {
-
-    position: relative;
-
-    display: flex;
-
-    align-items: center;
-
-    width: 100%;
-
-    min-height: 72px;
-
-    background: var(--white);
-
-    border: 1px solid var(--line);
-
-    border-radius: var(--radius-medium);
-
-    box-shadow: var(--shadow-small);
-
-    transition:
-        border-color var(--transition),
-        box-shadow var(--transition),
-        transform var(--transition);
-}
-
-
-.search-container:focus-within {
-
-    border-color: #bcbcbc;
-
-    box-shadow: var(--shadow-medium);
-
-    transform: translateY(-1px);
-}
-
-
-.search-icon {
-
-    width: 24px;
-
-    margin-left: 24px;
-
-    color: var(--silver-dark);
-}
-
-
-.search-icon svg {
-
-    display: block;
-
-    width: 21px;
-    height: 21px;
-
-    fill: none;
-
-    stroke: currentColor;
-
-    stroke-width: 1.7;
-
-    stroke-linecap: round;
-}
-
-
-#search {
-
-    flex: 1;
-
-    min-width: 0;
-
-    height: 70px;
-
-    padding:
-        0 18px;
-
-    border: 0;
-
-    outline: none;
-
-    background: transparent;
-
-    color: var(--black);
-
-    font-size: 18px;
-
-    font-weight: 450;
-}
-
-
-#search::placeholder {
-
-    color: #a0a0a0;
-}
-
-
-.search-command {
-
-    margin-right: 20px;
-
-    padding:
-        6px 9px;
-
-    border: 1px solid var(--line);
-
-    border-radius: 6px;
-
-    color: var(--silver-dark);
-
-    font-size: 10px;
-
-    font-weight: 650;
-
-    letter-spacing: 0.06em;
-
-    white-space: nowrap;
-}
-
-
-.search-hint {
-
-    margin-top: 13px;
-
-    padding-left: 4px;
-
-    color: #9a9a9a;
-
-    font-size: 11px;
-
-    letter-spacing: 0.01em;
-}
-
-
-/* =========================================================
-   RESULTS
-   ========================================================= */
-
-.results-section {
-
-    margin-top: 80px;
-}
-
-
-.section-header {
-
-    display: flex;
-
-    align-items: flex-end;
-
-    justify-content: space-between;
-
-    gap: 30px;
-
-    padding-bottom: 20px;
-
-    border-bottom: 1px solid var(--line);
-}
-
-
-.section-label {
-
-    display: block;
-
-    margin-bottom: 7px;
-
-    color: var(--silver-dark);
-
-    font-size: 9px;
-
-    font-weight: 750;
-
-    letter-spacing: 0.2em;
-}
-
-
-.section-header h2 {
-
-    margin: 0;
-
-    font-size: 27px;
-
-    font-weight: 650;
-
-    letter-spacing: -0.035em;
-}
-
-
-.result-count {
-
-    color: var(--silver-dark);
-
-    font-size: 11px;
-
-    font-weight: 600;
-
-    white-space: nowrap;
-}
-
-
-.results {
-
-    display: flex;
-
-    flex-direction: column;
-}
-
-
-/* =========================================================
-   RESULT CARD
-   ========================================================= */
-
-.result-card {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 20px;
-
-    min-height: 88px;
-
-    padding:
-        18px 5px 18px 0;
-
-    border-bottom: 1px solid var(--line);
-
-    transition:
-        padding var(--transition),
-        transform var(--transition);
-}
-
-
-.result-card:hover {
-
-    padding-left: 8px;
-    padding-right: 8px;
-}
-
-
-.result-card-name {
-
-    font-size: 17px;
-
-    font-weight: 650;
-
-    letter-spacing: -0.02em;
-}
-
-
-.result-card-info {
-
-    margin-top: 6px;
-
-    color: var(--silver-dark);
-
-    font-size: 12px;
-}
-
-
-.result-card-arrow {
-
-    width: 40px;
-    height: 40px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    border: 1px solid var(--line);
-
-    border-radius: 50%;
-
-    background: var(--white);
-
-    color: var(--black);
-
-    text-decoration: none;
-
-    font-size: 18px;
-
-    transition:
-        background var(--transition),
-        color var(--transition),
-        border-color var(--transition),
-        transform var(--transition);
-}
-
-
-.result-card-arrow:hover {
-
-    background: var(--black);
-
-    border-color: var(--black);
-
-    color: var(--white);
-
-    transform: translateX(3px);
-}
-
-
-/* =========================================================
-   EMPTY STATE
-   ========================================================= */
-
-.empty-state {
-
-    padding:
-        70px 20px;
-
-    text-align: center;
-
-    border-bottom: 1px solid var(--line);
-}
-
-
-.empty-icon {
-
-    width: 48px;
-    height: 48px;
-
-    margin: 0 auto 18px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border: 1px solid var(--line);
-
-    border-radius: 50%;
-
-    color: var(--silver-dark);
-}
-
-
-.empty-icon svg {
-
-    width: 20px;
-    height: 20px;
-
-    fill: none;
-
-    stroke: currentColor;
-
-    stroke-width: 1.5;
-
-    stroke-linecap: round;
-}
-
-
-.empty-state h3 {
-
-    margin: 0;
-
-    font-size: 16px;
-}
-
-
-.empty-state p {
-
-    margin: 8px 0 0;
-
-    color: var(--silver-dark);
-
-    font-size: 12px;
-}
-
-
-/* =========================================================
-   PROFILE PAGE
-   ========================================================= */
-
-.profile-page {
-
-    min-height: 100vh;
-}
-
-
-.profile {
-
-    width: 100%;
-
-    display: flex;
-
-    justify-content: center;
-
-    padding:
-        90px 0 80px;
-}
-
-
-/* =========================================================
-   PROFILE CARD
-   ========================================================= */
-
-.profile .card {
-
-    position: relative;
-
-    width: min(680px, 100%);
-
-    padding: 55px;
-
-    background: var(--white);
-
-    border: 1px solid var(--line);
-
-    border-radius: var(--radius-large);
-
-    box-shadow: var(--shadow-large);
-
-    overflow: hidden;
-}
-
-
-.profile .card::before {
-
-    content: "";
-
-    position: absolute;
-
-    top: 0;
-    left: 0;
-    right: 0;
-
-    height: 3px;
-
-    background: var(--black);
-}
-
-
-/* =========================================================
-   PROFILE IDENTITY
-   ========================================================= */
-
-.profile-identity {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 22px;
-
-    padding-bottom: 36px;
-
-    border-bottom: 1px solid var(--line);
-}
-
-
-.profile-avatar {
-
-    width: 76px;
-    height: 76px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    border-radius: 20px;
-
-    background: var(--black);
-
-    color: var(--white);
-
-    font-size: 21px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.04em;
-}
-
-
-.profile-heading h1 {
-
-    margin: 0;
-
-    font-size: clamp(34px, 5vw, 50px);
-
-    line-height: 1;
-
-    font-weight: 700;
-
-    letter-spacing: -0.055em;
-}
-
-
-.profile-heading h3 {
-
-    margin: 9px 0 0;
-
-    color: var(--silver-dark);
-
-    font-size: 14px;
-
-    font-weight: 500;
-}
-
-
-/* =========================================================
-   PROFILE INFORMATION
-   ========================================================= */
-
-.profile-information {
-
-    padding-top: 8px;
-}
-
-
-.profile-info-row {
-
-    display: grid;
-
-    grid-template-columns:
-        125px minmax(0, 1fr);
-
-    gap: 20px;
-
-    padding:
-        19px 0;
-
-    border-bottom: 1px solid var(--line);
-}
-
-
-.profile-info-label {
-
-    color: #999999;
-
-    font-size: 10px;
-
-    font-weight: 750;
-
-    letter-spacing: 0.12em;
-
-    text-transform: uppercase;
-}
-
-
-.profile-info-value {
-
-    min-width: 0;
-
-    color: var(--black);
-
-    font-size: 14px;
-
-    font-weight: 500;
-
-    line-height: 1.5;
-
-    overflow-wrap: anywhere;
-}
-
-
-.profile-link {
-
-    text-decoration: none;
-
-    transition: color var(--transition);
-}
-
-
-.profile-link:hover {
-
-    color: var(--silver-dark);
-
-    text-decoration: underline;
-
-    text-underline-offset: 3px;
-}
-
-
-/* =========================================================
-   PROFILE ACTION
-   ========================================================= */
-
-.profile-actions {
-
-    padding-top: 34px;
-}
-
-
-.save-contact-button {
-
-    width: 100%;
-
-    min-height: 60px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 12px;
-
-    border: 1px solid var(--black);
-
-    border-radius: 11px;
-
-    background: var(--black);
-
-    color: var(--white);
-
-    cursor: pointer;
-
-    font-size: 11px;
-
-    font-weight: 750;
-
-    letter-spacing: 0.14em;
-
-    transition:
-        background var(--transition),
-        color var(--transition),
-        transform var(--transition),
-        box-shadow var(--transition);
-}
-
-
-.save-contact-button:hover {
-
-    background: var(--white);
-
-    color: var(--black);
-
-    box-shadow: var(--shadow-medium);
-
-    transform: translateY(-2px);
-}
-
-
-.save-contact-button:active {
-
-    transform: translateY(0);
-}
-
-
-.save-contact-button.saved {
-
-    background: #ffffff;
-
-    color: #111111;
-
-    border-color: #111111;
-}
-
-
-.save-contact-icon {
-
-    width: 20px;
-    height: 20px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-}
-
-
-.save-contact-icon svg {
-
-    width: 19px;
-    height: 19px;
-
-    fill: none;
-
-    stroke: currentColor;
-
-    stroke-width: 1.5;
-
-    stroke-linecap: round;
-
-    stroke-linejoin: round;
-}
-
-
-.save-contact-status {
-
-    min-height: 18px;
-
-    padding-top: 10px;
-
-    color: var(--silver-dark);
-
-    font-size: 11px;
-
-    text-align: center;
-
-    opacity: 0;
-
-    transition: opacity var(--transition);
-}
-
-
-.save-contact-status.visible {
-
-    opacity: 1;
-}
-
-
-/* =========================================================
-   ERROR / NOT FOUND
-   ========================================================= */
-
-.profile .card h2 {
-
-    margin: 0;
-
-    font-size: 30px;
-
-    letter-spacing: -0.04em;
-}
-
-
-.profile .card > p {
-
-    color: var(--silver-dark);
-
-    font-size: 14px;
-
-    line-height: 1.6;
-}
-
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-.footer {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    gap: 20px;
-
-    margin-top: 100px;
-
-    padding-top: 20px;
-
-    border-top: 1px solid var(--line);
-
-    color: #9a9a9a;
-
-    font-size: 9px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.16em;
-}
-
-
-/* =========================================================
-   FOCUS
-   ========================================================= */
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-
-    outline: 2px solid var(--black);
-
-    outline-offset: 4px;
-}
-
-
-/* =========================================================
-   SELECTION
-   ========================================================= */
-
-::selection {
-
-    background: var(--black);
-
-    color: var(--white);
-}
-
-
-/* =========================================================
-   SCROLLBAR
-   ========================================================= */
-
-::-webkit-scrollbar {
-
-    width: 8px;
-}
-
-
-::-webkit-scrollbar-track {
-
-    background: #f5f5f5;
-}
-
-
-::-webkit-scrollbar-thumb {
-
-    background: #c9c9c9;
-
-    border-radius: 10px;
-}
-
-
-::-webkit-scrollbar-thumb:hover {
-
-    background: #999999;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 700px) {
-
-    .app {
-
-        width: min(
-            100% - 30px,
-            1180px
+    const contact =
+        contacts.find(
+            item =>
+                String(item.id) === String(id)
         );
 
-        padding-top: 20px;
+
+    /*
+     * Kontakt nicht gefunden
+     */
+
+    if (!contact) {
+
+        profile.innerHTML = `
+
+            <div class="card">
+
+                <h2>
+                    Person nicht gefunden
+                </h2>
+
+                <p>
+                    Dieser Kontakt existiert nicht
+                    oder wurde entfernt.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
     }
 
 
-    .hero {
+    /*
+     * -----------------------------------------------------
+     * INFORMATIONEN
+     * -----------------------------------------------------
+     */
 
-        padding-top: 75px;
-    }
+    const companyHTML =
+        contact.company
+            ? `
+
+                <div class="profile-info-row">
+
+                    <span class="profile-info-label">
+                        Unternehmen
+                    </span>
+
+                    <span class="profile-info-value">
+                        ${escapeHTML(contact.company)}
+                    </span>
+
+                </div>
+
+            `
+            : "";
 
 
-    .hero h1 {
+    const jobHTML =
+        contact.job
+            ? `
 
-        font-size: clamp(
-            42px,
-            13vw,
-            65px
+                <div class="profile-info-row">
+
+                    <span class="profile-info-label">
+                        Position
+                    </span>
+
+                    <span class="profile-info-value">
+                        ${escapeHTML(contact.job)}
+                    </span>
+
+                </div>
+
+            `
+            : "";
+
+
+    const emailHTML =
+        contact.email
+            ? `
+
+                <div class="profile-info-row">
+
+                    <span class="profile-info-label">
+                        E-Mail
+                    </span>
+
+                    <a
+                        class="profile-info-value profile-link"
+                        href="mailto:${escapeHTML(contact.email)}"
+                    >
+                        ${escapeHTML(contact.email)}
+                    </a>
+
+                </div>
+
+            `
+            : "";
+
+
+    const phoneHTML =
+        contact.phone
+            ? `
+
+                <div class="profile-info-row">
+
+                    <span class="profile-info-label">
+                        Telefon
+                    </span>
+
+                    <a
+                        class="profile-info-value profile-link"
+                        href="tel:${escapeHTML(contact.phone)}"
+                    >
+                        ${escapeHTML(contact.phone)}
+                    </a>
+
+                </div>
+
+            `
+            : "";
+
+
+    const websiteHTML =
+        contact.website
+            ? `
+
+                <div class="profile-info-row">
+
+                    <span class="profile-info-label">
+                        Website
+                    </span>
+
+                    <a
+                        class="profile-info-value profile-link"
+                        href="${escapeHTML(contact.website)}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        ${escapeHTML(contact.website)}
+                    </a>
+
+                </div>
+
+            `
+            : "";
+
+
+    /*
+     * -----------------------------------------------------
+     * PROFIL RENDERN
+     * -----------------------------------------------------
+     */
+
+    profile.innerHTML = `
+
+        <div class="card">
+
+
+            <!-- IDENTITÄT -->
+
+            <div class="profile-identity">
+
+
+                <div class="profile-avatar">
+
+                    ${escapeHTML(
+                        getInitials(contact.name)
+                    )}
+
+                </div>
+
+
+                <div class="profile-heading">
+
+                    <h1>
+
+                        ${escapeHTML(contact.name)}
+
+                    </h1>
+
+
+                    ${
+                        contact.job
+                            ? `
+                                <h3>
+                                    ${escapeHTML(contact.job)}
+                                </h3>
+                            `
+                            : ""
+                    }
+
+                </div>
+
+
+            </div>
+
+
+            <!-- INFORMATIONEN -->
+
+            <div class="profile-information">
+
+                ${companyHTML}
+
+                ${jobHTML}
+
+                ${emailHTML}
+
+                ${phoneHTML}
+
+                ${websiteHTML}
+
+            </div>
+
+
+            <!-- SPEICHERN -->
+
+            <div class="profile-actions">
+
+                <button
+                    id="saveContactButton"
+                    class="save-contact-button"
+                    type="button"
+                >
+
+                    <span
+                        class="save-contact-icon"
+                        aria-hidden="true"
+                    >
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path
+                                d="M5 3h11l3 3v15H5z"
+                            ></path>
+
+                            <path
+                                d="M8 3v6h8V3"
+                            ></path>
+
+                            <circle
+                                cx="12"
+                                cy="16"
+                                r="2.5"
+                            ></circle>
+
+                        </svg>
+
+                    </span>
+
+
+                    <span>
+                        KONTAKT SPEICHERN
+                    </span>
+
+                </button>
+
+
+                <div
+                    id="saveContactStatus"
+                    class="save-contact-status"
+                    aria-live="polite"
+                ></div>
+
+            </div>
+
+
+        </div>
+
+    `;
+
+
+    /*
+     * -----------------------------------------------------
+     * BUTTON VERBINDEN
+     * -----------------------------------------------------
+     */
+
+    const button =
+        document.getElementById(
+            "saveContactButton"
         );
+
+
+    if (button) {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                saveContact(
+                    contact,
+                    button
+                );
+
+            }
+        );
+
     }
 
-
-    .search-section {
-
-        margin-top: 50px;
-    }
-
-
-    .search-command {
-
-        display: none;
-    }
-
-
-    .search-container {
-
-        min-height: 64px;
-    }
-
-
-    #search {
-
-        height: 62px;
-
-        font-size: 16px;
-    }
-
-
-    .results-section {
-
-        margin-top: 60px;
-    }
-
-
-    .profile {
-
-        padding-top: 65px;
-    }
-
-
-    .profile .card {
-
-        padding: 32px 24px;
-
-        border-radius: 18px;
-    }
-
-
-    .profile-identity {
-
-        align-items: flex-start;
-
-        gap: 16px;
-    }
-
-
-    .profile-avatar {
-
-        width: 62px;
-        height: 62px;
-
-        border-radius: 16px;
-
-        font-size: 17px;
-    }
-
-
-    .profile-heading h1 {
-
-        font-size: 34px;
-    }
-
-
-    .profile-info-row {
-
-        grid-template-columns: 1fr;
-
-        gap: 6px;
-    }
-
-
-    .footer {
-
-        margin-top: 70px;
-
-        flex-direction: column;
-
-        gap: 8px;
-    }
 }
 
 
-@media (max-width: 420px) {
+/* =========================================================
+   KONTAKT SPEICHERN
+   ========================================================= */
 
-    .app {
+function saveContact(
+    contact,
+    button
+) {
 
-        width: calc(100% - 24px);
+    if (!contact) {
+
+        return;
     }
 
 
-    .brand-mark {
+    /*
+     * -----------------------------------------------------
+     * vCARD ERSTELLEN
+     * -----------------------------------------------------
+     */
 
-        width: 38px;
-        height: 38px;
+    const lines = [
+
+        "BEGIN:VCARD",
+
+        "VERSION:3.0",
+
+        `N:${escapeVCard(contact.name)};;;;`,
+
+        `FN:${escapeVCard(contact.name)}`
+
+    ];
+
+
+    if (contact.company) {
+
+        lines.push(
+            `ORG:${escapeVCard(contact.company)}`
+        );
+
     }
 
 
-    .brand-name {
+    if (contact.job) {
 
-        font-size: 14px;
+        lines.push(
+            `TITLE:${escapeVCard(contact.job)}`
+        );
+
     }
 
 
-    .brand-subtitle {
+    if (contact.phone) {
 
-        font-size: 7px;
+        lines.push(
+            `TEL;TYPE=CELL:${escapeVCard(contact.phone)}`
+        );
+
     }
 
 
-    .hero {
+    if (contact.email) {
 
-        padding-top: 60px;
+        lines.push(
+            `EMAIL:${escapeVCard(contact.email)}`
+        );
+
     }
 
 
-    .hero h1 {
+    if (contact.website) {
 
-        font-size: 41px;
+        lines.push(
+            `URL:${escapeVCard(contact.website)}`
+        );
+
     }
 
 
-    .hero p {
+    lines.push("END:VCARD");
 
-        font-size: 14px;
+
+    const vcard =
+        lines.join("\r\n");
+
+
+    /*
+     * -----------------------------------------------------
+     * DATEI ERSTELLEN
+     * -----------------------------------------------------
+     */
+
+    const blob =
+        new Blob(
+            [vcard],
+            {
+                type:
+                    "text/vcard;charset=utf-8"
+            }
+        );
+
+
+    /*
+     * Temporäre Browser-URL
+     */
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    /*
+     * Download-Link
+     */
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+
+    link.download =
+        `${safeFileName(contact.name)}.vcf`;
+
+
+    link.style.display =
+        "none";
+
+
+    document.body.appendChild(link);
+
+
+    /*
+     * Download starten
+     */
+
+    link.click();
+
+
+    /*
+     * Link entfernen
+     */
+
+    document.body.removeChild(link);
+
+
+    /*
+     * URL später freigeben
+     */
+
+    setTimeout(
+        () => {
+
+            URL.revokeObjectURL(url);
+
+        },
+        1000
+    );
+
+
+    /*
+     * -----------------------------------------------------
+     * FEEDBACK
+     * -----------------------------------------------------
+     */
+
+    if (button) {
+
+        button.classList.add("saved");
+
+
+        const text =
+            button.querySelector(
+                "span:last-child"
+            );
+
+
+        if (text) {
+
+            text.textContent =
+                "KONTAKT ERSTELLT";
+        }
+
     }
 
 
-    .profile {
+    const status =
+        document.getElementById(
+            "saveContactStatus"
+        );
 
-        padding-top: 50px;
+
+    if (status) {
+
+        status.textContent =
+            "Die Kontaktdatei wurde erstellt.";
+
+        status.classList.add(
+            "visible"
+        );
+
     }
 
 
-    .profile .card {
+    /*
+     * Button nach einigen Sekunden
+     * zurücksetzen
+     */
 
-        padding: 28px 20px;
-    }
+    setTimeout(
+        () => {
+
+            if (button) {
+
+                button.classList.remove(
+                    "saved"
+                );
 
 
-    .profile-identity {
+                const text =
+                    button.querySelector(
+                        "span:last-child"
+                    );
 
-        flex-direction: column;
-    }
 
+                if (text) {
 
-    .profile-heading h1 {
+                    text.textContent =
+                        "KONTAKT SPEICHERN";
+                }
 
-        font-size: 31px;
-    }
+            }
+
+        },
+        3000
+    );
+
 }
+
+
+/* =========================================================
+   APP START
+   ========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        initializeSearch();
+
+        initializeProfile();
+
+    }
+);
