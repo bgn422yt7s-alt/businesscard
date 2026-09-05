@@ -1,65 +1,96 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+
     <meta
         name="description"
         content="Kontaktprofil | ContactFinder"
     >
+
     <meta
         name="theme-color"
-        content="#090909"
+        content="#080808"
     >
-    <title>Kontakt | ContactFinder</title>
-    <link rel="stylesheet" href="style.css">
+
+    <title>
+        Kontakt | ContactFinder
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
 </head>
+
+
 <body>
+
     <main class="app profile-page">
+
+
         <!-- =================================================
              HEADER
              ================================================= -->
+
         <header class="header">
+
             <div class="brand">
+
                 <div
                     class="brand-mark"
                     aria-hidden="true"
                 >
                     CF
                 </div>
+
                 <div class="brand-text">
+
                     <span class="brand-name">
                         ContactFinder
                     </span>
+
                     <span class="brand-subtitle">
                         CONTACT INTELLIGENCE
                     </span>
+
                 </div>
+
             </div>
+
         </header>
+
+
         <!-- =================================================
-             PROFILE
+             PROFIL
              ================================================= -->
+
         <section
             id="profile"
             class="profile"
             aria-label="Kontaktprofil"
         >
-            <!--
-                person.js fügt hier automatisch
-                das ausgewählte Kontaktprofil ein.
-            -->
+
+            <!-- app.js lädt hier das Profil -->
+
         </section>
+
+
     </main>
-    <!-- =====================================================
-         JAVASCRIPT
-         contacts.js = zentrale Kontaktdaten
-         person.js   = Profil + Kontakt speichern
-         ===================================================== -->
-    <script src="contacts.js"></script>
-    <script src="person.js"></script>
+
+
+    <!-- AUCH HIER NUR DIE EINE DATEI -->
+
+    <script src="app.js"></script>
+
 </body>
+
 </html>
