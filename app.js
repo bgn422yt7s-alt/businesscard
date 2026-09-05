@@ -32,31 +32,21 @@ const contacts = [
 
     {
         id: 1,
-        name: "Max Mustermann",
-        job: "Geschäftsführer",
-        company: "Muster GmbH",
-        email: "max@muster.de",
+        name: "Bennet Grabherr",
+        job: "CEO",
+        company: "Grabherr Holding",
+        email: "",
         phone: "+49 123456",
-        website: "https://muster.de"
+        website: "0176 60347283"
     },
 
     {
         id: 2,
-        name: "Anna Beispiel",
-        job: "Marketing Managerin",
-        company: "Beispiel AG",
-        email: "anna@beispiel.de",
-        phone: "+49 987654",
-        website: "https://beispiel.de"
-    },
-
-    {
-        id: 3,
-        name: "Anne",
+        name: "Anne Grabherr",
         job: "",
         company: "",
         email: "",
-        phone: "",
+        phone: "01736897078",
         website: ""
     }
 
