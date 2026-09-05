@@ -1,104 +1,132 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+
     <meta
         name="description"
         content="ContactFinder – Kontakte präzise und elegant finden."
     >
+
     <meta
         name="theme-color"
-        content="#090909"
+        content="#080808"
     >
+
     <title>ContactFinder</title>
-    <link rel="stylesheet" href="style.css">
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 </head>
+
 <body>
+
     <main class="app">
+
         <!-- =================================================
              HEADER
              ================================================= -->
+
         <header class="header">
+
             <div class="brand">
+
                 <div
                     class="brand-mark"
                     aria-hidden="true"
                 >
                     CF
                 </div>
+
                 <div class="brand-text">
+
                     <span class="brand-name">
                         ContactFinder
                     </span>
+
                     <span class="brand-subtitle">
                         CONTACT INTELLIGENCE
                     </span>
+
                 </div>
+
             </div>
-            <div
-                class="header-status"
-                aria-label="Systemstatus: Online"
-            >
-                <span
-                    class="status-dot"
-                    aria-hidden="true"
-                ></span>
-                <span>
-                    SYSTEM ONLINE
-                </span>
-            </div>
+
         </header>
+
+
         <!-- =================================================
              HERO
              ================================================= -->
+
         <section class="hero">
+
             <div class="hero-label">
+
                 <span aria-hidden="true"></span>
+
                 SMART CONTACT SEARCH
+
             </div>
+
             <h1>
                 Finden Sie den<br>
                 <strong>richtigen Kontakt.</strong>
             </h1>
+
             <p>
                 Präzise. Schnell. Diskret.
             </p>
+
         </section>
+
+
         <!-- =================================================
-             SEARCH
+             SUCHE
              ================================================= -->
+
         <section
             class="search-section"
             aria-label="Kontaktsuche"
         >
+
             <div class="search-container">
-                <!-- Search Icon -->
+
                 <div
                     class="search-icon"
                     aria-hidden="true"
                 >
+
                     <svg
                         viewBox="0 0 24 24"
-                        role="img"
                     >
+
                         <circle
                             cx="11"
                             cy="11"
                             r="6.5"
                         ></circle>
+
                         <line
                             x1="16"
                             y1="16"
                             x2="21"
                             y2="21"
                         ></line>
+
                     </svg>
+
                 </div>
-                <!-- Search Input -->
+
+
                 <input
                     id="search"
                     type="search"
@@ -109,35 +137,51 @@
                     spellcheck="false"
                     aria-label="Person suchen"
                 >
-                <!-- Keyboard Shortcut -->
+
+
                 <div
                     class="search-command"
                     aria-hidden="true"
                 >
                     ⌘ K
                 </div>
+
             </div>
+
+
             <div class="search-hint">
+
                 Namen, Unternehmen oder andere Informationen eingeben
+
             </div>
+
         </section>
+
+
         <!-- =================================================
-             RESULTS
+             ERGEBNISSE
              ================================================= -->
+
         <section
             class="results-section"
             aria-label="Suchergebnisse"
         >
-            <!-- Results Header -->
+
             <div class="section-header">
+
                 <div>
+
                     <span class="section-label">
                         RESULTS
                     </span>
+
                     <h2>
                         Suchergebnisse
                     </h2>
+
                 </div>
+
+
                 <div
                     id="resultCount"
                     class="result-count"
@@ -145,57 +189,42 @@
                 >
                     0 Kontakte
                 </div>
+
             </div>
-            <!-- Results Container -->
+
+
             <div
                 id="results"
                 class="results"
                 aria-live="polite"
-            >
-                <!--
-                    Wird automatisch durch
-                    script.js gefüllt.
-                -->
-            </div>
+            ></div>
+
         </section>
+
+
         <!-- =================================================
              FOOTER
              ================================================= -->
+
         <footer class="footer">
-            <div>
+
+            <span>
                 CONTACTFINDER
-            </div>
-            <div>
-                <span>
-                    SECURE
-                </span>
-                <span
-                    class="footer-separator"
-                    aria-hidden="true"
-                >
-                    •
-                </span>
-                <span>
-                    PRIVATE
-                </span>
-                <span
-                    class="footer-separator"
-                    aria-hidden="true"
-                >
-                    •
-                </span>
-                <span>
-                    PRECISE
-                </span>
-            </div>
+            </span>
+
+            <span>
+                CONTACT INTELLIGENCE
+            </span>
+
         </footer>
+
     </main>
-    <!-- =====================================================
-         JAVASCRIPT
-         WICHTIG:
-         contacts.js MUSS vor script.js geladen werden.
-         ===================================================== -->
-    <script src="contacts.js"></script>
-    <script src="script.js"></script>
+
+
+    <!-- NUR DIESE EINE JAVASCRIPT-DATEI -->
+
+    <script src="app.js"></script>
+
 </body>
+
 </html>
