@@ -119,19 +119,18 @@ a {
 
 .profile-header {
     justify-content: flex-start;
+    align-items: flex-start;
+    padding-top: 20px;
 }
 
 .profile-logo {
     display: block;
-
-    width: auto;
-    height: 48px;
-
-    max-width: 180px;
-
+    width: 90px;
+    height: auto;
+    max-width: 90px;
+    max-height: 32px;
     object-fit: contain;
-
-    object-position: left center;
+    object-position: left top;
 }
 .header {
 
