@@ -36,8 +36,8 @@ const contacts = [
         job: "CEO",
         company: "Grabherr Holding",
         email: "",
-        phone: "+49 123456",
-        website: "0176 60347283"
+        phone: "0176 60347283",
+        website: ""
     },
 
     {
