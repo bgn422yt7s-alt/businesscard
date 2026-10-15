@@ -48,6 +48,15 @@ const contacts = [
         email: "",
         phone: "01736897078",
         website: ""
+    },
+    {
+        id: 3,
+        name: "Bennet Grabherr",
+        job: "",
+        company: "",
+        email: "",
+        phone: "0176 60347283",
+        website: ""
     }
 
 ];
