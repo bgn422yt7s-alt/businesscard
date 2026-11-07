@@ -1,32 +1,4 @@
-/*
- * =========================================================
- * CONTACTFINDER
- * ZENTRALE APP.JS
- * =========================================================
- *
- * Diese Datei übernimmt ALLES:
- *
- * - Kontakt-Datenbank
- * - Suche
- * - Ergebnisliste
- * - Profilseite
- * - vCard-Erstellung
- * - Kontakt speichern
- *
- * Sie funktioniert automatisch auf:
- *
- * - index.html
- * - person.html
- *
- * Es werden KEINE weiteren JavaScript-Dateien benötigt.
- *
- * =========================================================
- */
 
-
-/* =========================================================
-   KONTAKTDATEN
-   ========================================================= */
 
 const contacts = [
 
